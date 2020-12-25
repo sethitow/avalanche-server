@@ -25,9 +25,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-
+        
+      - name: Select Toolchain
+        run: rustup default nightly
+        
       - name: Run tests
-        run: cargo +nightly test
+        run: cargo test
 
   # Push image to GitHub Packages.
   # See also https://docs.docker.com/docker-hub/builds/
