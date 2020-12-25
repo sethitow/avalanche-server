@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: avalanche-backend
+  name: avalanche-server
   namespace: avalanche
 spec:
   ports:
@@ -11,27 +11,27 @@ spec:
       protocol: TCP
       name: http
   selector:
-    app: avalanche-backend
+    app: avalanche-server
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: avalanche-backend
+  name: avalanche-server
   namespace: avalanche
   labels:
-    app: avalanche-backend
+    app: avalanche-server
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: avalanche-backend
+      app: avalanche-server
   template:
     metadata:
       labels:
-        app: avalanche-backend
+        app: avalanche-server
     spec:
       containers:
-        - name: avalanche-backend
+        - name: avalanche-server
           image: registry.gitlab.com/sethitow/avalanche-server/server:latest
           ports:
             - name: http
