@@ -9,7 +9,7 @@ RUN cargo build --release
 
 
 FROM debian:buster-slim
-
+RUN apt-get update; apt-get install openssl -y
 COPY --from=builder /avalanche-server/target/release/avalanche_server .
 COPY avalanche_data.json .
 
