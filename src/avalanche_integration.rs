@@ -40,9 +40,7 @@ pub fn get_forecast_response(
     for elem in bottom_line.root_element().text() {
         travel_advice.push_str(elem)
     }
-    travel_advice = travel_advice
-        .to_string()
-        .replace(|c: char| !c.is_ascii(), "");
+    travel_advice = travel_advice.replace(|c: char| !c.is_ascii(), "");
 
     let high_danger = cmp::max(
         resp.danger[0].lower,

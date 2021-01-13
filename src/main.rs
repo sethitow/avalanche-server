@@ -21,7 +21,10 @@ fn forecast(center: &http::RawStr) -> Option<content::Json<String>> {
         Ok(x) => Some(content::Json(
             serde_json::to_string(&x).expect("Could not seralize response"),
         )),
-        Err(_) => None,
+        Err(x) => {
+            println!("{:?}", x);
+            None
+        }
     }
 }
 
