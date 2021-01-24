@@ -1,6 +1,8 @@
+use chrono::DateTime;
 use scraper::Html;
 use serde::{Deserialize, Serialize};
 use std::cmp;
+use std::convert::TryFrom;
 
 const QUERY_URL: &str =
     "https://api.avalanche.org/v2/public/product?type=forecast&center_id=SAC&zone_id=77";
@@ -9,12 +11,16 @@ const QUERY_URL: &str =
 pub struct ForecastResponse {
     pub danger_level: i8,
     pub travel_advice: String,
+    pub updated_at: i32,
+    pub expires_at: i32,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Root {
     pub danger: Vec<DangerItem>,
     pub bottom_line: String,
+    pub updated_at: String,
+    pub expires_time: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -47,9 +53,14 @@ pub fn get_forecast_response(
         cmp::max(resp.danger[0].middle, resp.danger[0].upper),
     );
 
+    let updated_at = DateTime::parse_from_rfc3339(&resp.updated_at)?;
+    let expires_at = DateTime::parse_from_rfc3339(&resp.expires_time)?;
+
     let r = ForecastResponse {
         danger_level: high_danger,
         travel_advice: travel_advice,
+        updated_at: i32::try_from(updated_at.timestamp())?,
+        expires_at: i32::try_from(expires_at.timestamp())?,
     };
     return Ok(r);
 }

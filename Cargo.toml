@@ -7,6 +7,7 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+chrono = "0.4"
 scraper = "0.12.0"
 reqwest = { version = "0.11", features = ["blocking", "json"] }
 rocket = "0.4.6"
