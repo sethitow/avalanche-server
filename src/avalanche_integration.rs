@@ -10,6 +10,9 @@ const QUERY_URL: &str =
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ForecastResponse {
     pub danger_level: i8,
+    pub upper_danger_level: i8,
+    pub middle_danger_level: i8,
+    pub lower_danger_level: i8,
     pub travel_advice: String,
     pub updated_at: i32,
     pub expires_at: i32,
@@ -58,6 +61,9 @@ pub fn get_forecast_response(
 
     let r = ForecastResponse {
         danger_level: high_danger,
+        upper_danger_level: resp.danger[0].upper,
+        middle_danger_level: resp.danger[0].middle,
+        lower_danger_level: resp.danger[0].lower,
         travel_advice: travel_advice,
         updated_at: i32::try_from(updated_at.timestamp())?,
         expires_at: i32::try_from(expires_at.timestamp())?,
