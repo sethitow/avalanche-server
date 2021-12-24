@@ -1,4 +1,4 @@
-FROM rust:1.48 as builder
+FROM rust:1.57 as builder
 
 WORKDIR ./avalanche-server
 RUN rustup default nightly

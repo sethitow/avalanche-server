@@ -4,9 +4,11 @@ stages:
 
 unit-test:
   stage: test
-  image: rust:1.48
+  image: rust:1.57
   before_script:
     - rustup default nightly
+    - cargo --version
+    - rustc --version;
   script:
     - cargo test --verbose
 
