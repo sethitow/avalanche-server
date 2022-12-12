@@ -1,72 +1,63 @@
 use chrono::DateTime;
-use scraper::Html;
 use serde::{Deserialize, Serialize};
-use std::cmp;
 use std::convert::TryFrom;
 
-const QUERY_URL: &str =
-    "https://api.avalanche.org/v2/public/product?type=forecast&center_id=SAC&zone_id=77";
+const QUERY_BASE_URL: &str =
+    "https://api.avalanche.org/v2/public/products/map-layer/";
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ForecastResponse {
     pub danger_level: i8,
-    pub upper_danger_level: i8,
-    pub middle_danger_level: i8,
-    pub lower_danger_level: i8,
     pub travel_advice: String,
     pub updated_at: i32,
     pub expires_at: i32,
+    pub off_season: bool
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Root {
-    pub danger: Vec<DangerItem>,
-    pub bottom_line: String,
-    pub updated_at: String,
-    pub expires_time: String,
+    #[serde(rename(serialize = "type", deserialize = "type"))]
+    pub object_type: String, 
+    pub features: Vec<Feature>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct DangerItem {
-    pub lower: i8,
-    pub upper: i8,
-    pub middle: i8,
-    pub valid_day: String,
+struct Feature {
+    #[serde(rename(serialize = "type", deserialize = "type"))]
+    pub object_type: String,
+    pub properties: Properties,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct Properties {
+    pub danger_level: i8,
+    pub travel_advice: String,
+    pub start_date: String,
+    pub end_date: String,
+    pub off_season: bool
 }
 
 pub fn get_forecast_response(
     center_id: String,
 ) -> Result<ForecastResponse, Box<dyn std::error::Error>> {
-    if center_id != "SAC" {
-        return Err("Unknown Avalanche Center".into());
-    }
+    let query_url = String::from(QUERY_BASE_URL) + &center_id;
 
-    let resp = reqwest::blocking::get(QUERY_URL)?.json::<Root>()?;
+    let resp = reqwest::blocking::get(query_url)?.json::<Root>()?;
     println!("{:?}", resp);
 
-    let bottom_line = Html::parse_fragment(resp.bottom_line.as_str());
-    let mut travel_advice = String::new();
-    for elem in bottom_line.root_element().text() {
-        travel_advice.push_str(elem)
-    }
-    travel_advice = travel_advice.replace(|c: char| !c.is_ascii(), "");
+    let feature = &resp.features[0];
 
-    let high_danger = cmp::max(
-        resp.danger[0].lower,
-        cmp::max(resp.danger[0].middle, resp.danger[0].upper),
-    );
-
-    let updated_at = DateTime::parse_from_rfc3339(&resp.updated_at)?;
-    let expires_at = DateTime::parse_from_rfc3339(&resp.expires_time)?;
+    let parsable_start_date = feature.properties.start_date.clone() + "Z";
+    let parsable_end_date = feature.properties.end_date.clone() + "Z";
+    let updated_at = DateTime::parse_from_rfc3339(&parsable_start_date)?;
+    let expires_at = DateTime::parse_from_rfc3339(&parsable_end_date)?;
 
     let r = ForecastResponse {
-        danger_level: high_danger,
-        upper_danger_level: resp.danger[0].upper,
-        middle_danger_level: resp.danger[0].middle,
-        lower_danger_level: resp.danger[0].lower,
-        travel_advice: travel_advice,
+        danger_level: feature.properties.danger_level,
+        travel_advice: feature.properties.travel_advice.clone(),
         updated_at: i32::try_from(updated_at.timestamp())?,
         expires_at: i32::try_from(expires_at.timestamp())?,
+        off_season: feature.properties.off_season
     };
     return Ok(r);
 }

@@ -10,7 +10,7 @@ mod avalanche_integration;
 
 #[get("/")]
 fn index() -> &'static str {
-    "Hello, world!"
+    "usage: /forecast/<center>"
 }
 
 #[get("/forecast/<center>")]
