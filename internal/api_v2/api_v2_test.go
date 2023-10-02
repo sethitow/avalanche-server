@@ -24,7 +24,8 @@ func TestGetForecastOffSeason(t *testing.T) {
 
 	decoder := json.NewDecoder(file)
 	aaaResponse := aaa_api.Root{}
-	decoder.Decode(&aaaResponse)
+	err = decoder.Decode(&aaaResponse)
+	assert.Nil(t, err)
 	requester.On("GetForecastByCenter", "SAC").Return(aaaResponse, nil)
 
 	w := httptest.NewRecorder()
@@ -39,7 +40,8 @@ func TestGetForecastOffSeason(t *testing.T) {
 
 	responseDecoder := json.NewDecoder(w.Body)
 	response := Envelope{}
-	responseDecoder.Decode(&response)
+	err = responseDecoder.Decode(&response)
+	assert.Nil(t, err)
 	assert.Equal(t, ResponseStatusSuccess, response.Status)
 
 	// To get the data into the struct, it's reserialized as JSON the deserialized again into a struct
@@ -83,7 +85,8 @@ func TestGetForecastAAAAPIError(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 	responseDecoder := json.NewDecoder(w.Body)
 	response := EnvelopeError{}
-	responseDecoder.Decode(&response)
+	err = responseDecoder.Decode(&response)
+	assert.Nil(t, err)
 	assert.Equal(t, EnvelopeError{
 		Status:  ResponseStatusError,
 		Message: "error from Avalanche.org",

@@ -15,5 +15,8 @@ func main() {
 	v2controller := apiv2.APIv2Controller{Requester: &apiRequester}
 	r.GET("/forecast/:center", v1controller.GetForecast)
 	r.GET("/v2/forecast/:center", v2controller.GetForecast)
-	r.Run()
+	err := r.Run()
+	if err != nil {
+		panic(err)
+	}
 }

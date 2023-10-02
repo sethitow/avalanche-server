@@ -33,6 +33,9 @@ func (APIRequester) GetForecastByCenter(centerId string) (Root, error) {
 
 	decoder := json.NewDecoder(resp.Body)
 	root := Root{}
-	decoder.Decode(&root)
+	err = decoder.Decode(&root)
+	if err != nil {
+		return root, err
+	}
 	return root, nil
 }

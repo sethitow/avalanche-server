@@ -25,7 +25,8 @@ func TestGetForecastOffSeason(t *testing.T) {
 
 	decoder := json.NewDecoder(file)
 	aaaResponse := aaa_api.Root{}
-	decoder.Decode(&aaaResponse)
+	err = decoder.Decode(&aaaResponse)
+	assert.Nil(t, err)
 	requester.On("GetForecastByCenter", "SAC").Return(aaaResponse, nil)
 
 	w := httptest.NewRecorder()
@@ -40,7 +41,8 @@ func TestGetForecastOffSeason(t *testing.T) {
 
 	responseDecoder := json.NewDecoder(w.Body)
 	response := Response{}
-	responseDecoder.Decode(&response)
+	err = responseDecoder.Decode(&response)
+	assert.Nil(t, err)
 	assert.Equal(t,
 		Response{DangerLevel: -1,
 			TravelAdvice: "Watch for signs of unstable snow such as recent avalanches, cracking in the snow, and audible collapsing. Avoid traveling on or under similar slopes.",
