@@ -6,7 +6,7 @@ metadata:
   namespace: avalanche
 spec:
   ports:
-    - port: 8000
+    - port: 8080
       targetPort: http
       protocol: TCP
       name: http
@@ -32,8 +32,11 @@ spec:
     spec:
       containers:
         - name: avalanche-server
-          image: registry.gitlab.com/sethitow/avalanche-server/server:latest
+          image: ghcr.io/sethitow/avalanche-server:main
+          env:
+          - name: GIN_MODE
+            value: release
           ports:
             - name: http
-              containerPort: 8000
+              containerPort: 8080
               protocol: TCP
