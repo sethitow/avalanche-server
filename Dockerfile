@@ -1,8 +1,9 @@
-FROM golang:1.21-bookworm
+FROM golang:1.23-bookworm
 
 WORKDIR /app
 
 COPY go.mod go.sum ./
+
 RUN go mod download
 
 # Copy the source code. Note the slash at the end, as explained in
@@ -15,6 +16,7 @@ FROM debian:bookworm-slim
 
 RUN apt-get update && apt-get install -y \
     ca-certificates \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=0 /app/avalancheserver /bin/avalancheserver
