@@ -21,9 +21,9 @@ const (
 	RFC3339Z = "2006-01-02T15:04:05"
 )
 
-type Envelope struct {
+type Envelope[T any] struct {
 	Status ResponseStatus `json:"status"`
-	Data   interface{}    `json:"data"`
+	Data   T              `json:"data"`
 }
 
 type EnvelopeError struct {
@@ -127,7 +127,7 @@ func (controller *APIv3Controller) GetForecast(c *gin.Context) {
 		forecastAreas = append(forecastAreas, forecastArea)
 	}
 
-	c.JSON(http.StatusOK, Envelope{
+	c.JSON(http.StatusOK, Envelope[Response]{
 		Status: ResponseStatusSuccess,
 		Data: Response{
 			MostSevereDangerLevel: mostSevereDangerLevel,

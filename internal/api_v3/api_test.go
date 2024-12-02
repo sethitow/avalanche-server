@@ -39,37 +39,26 @@ func TestGetForecastOffSeason(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	responseDecoder := json.NewDecoder(w.Body)
-	response := Envelope{}
+	response := Envelope[Response]{}
 	err = responseDecoder.Decode(&response)
 	assert.Nil(t, err)
 	assert.Equal(t, ResponseStatusSuccess, response.Status)
-
-	// To get the data into the struct, it's reserialized as JSON the deserialized again into a struct
-	jsonStr, err := json.Marshal(response.Data)
-	assert.Nil(t, err)
-	var responseData Response
-	err = json.Unmarshal(jsonStr, &responseData)
-	assert.Nil(t, err)
 
 	assert.Equal(t, Response{
 		MostSevereDangerLevel: -1,
 		MostSevereAreaName:    "",
 		Areas: []ForecastArea{
-			{Name: "",
+			{Name: "Central Sierra Nevada",
 				DangerLevel:  -1,
 				TravelAdvice: "Watch for signs of unstable snow such as recent avalanches, cracking in the snow, and audible collapsing. Avoid traveling on or under similar slopes.",
 				OffSeason:    true}},
 	},
-		responseData)
+		response.Data)
 }
 
 func TestGetForecastAAAAPIError(t *testing.T) {
 	requester := mocks.NewRequester(t)
 	controller := APIv3Controller{Requester: requester}
-
-	file, err := os.Open("../aaa_api/testdata/offseason_sac.json")
-	assert.Nil(t, err)
-	defer file.Close()
 
 	aaaResponse := aaa_api.Root{}
 	requester.On("GetForecastByCenter", "SAC").Return(aaaResponse, aaa_api.ErrUpstreamAPIError)
@@ -85,7 +74,7 @@ func TestGetForecastAAAAPIError(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 	responseDecoder := json.NewDecoder(w.Body)
 	response := EnvelopeError{}
-	err = responseDecoder.Decode(&response)
+	err := responseDecoder.Decode(&response)
 	assert.Nil(t, err)
 	assert.Equal(t, EnvelopeError{
 		Status:  ResponseStatusError,

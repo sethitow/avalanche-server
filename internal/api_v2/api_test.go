@@ -5,7 +5,6 @@ import (
 	"avalancheserver/internal/aaa_api/mocks"
 	"bytes"
 	"encoding/json"
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -17,7 +16,7 @@ import (
 
 func TestGetForecastOffSeason(t *testing.T) {
 	requester := mocks.NewRequester(t)
-	controller := APIv1Controller{Requester: requester}
+	controller := APIv2Controller{Requester: requester}
 
 	file, err := os.Open("../aaa_api/testdata/offseason_sac.json")
 	assert.Nil(t, err)
@@ -40,24 +39,21 @@ func TestGetForecastOffSeason(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	responseDecoder := json.NewDecoder(w.Body)
-	response := Response{}
+	response := Envelope{}
 	err = responseDecoder.Decode(&response)
 	assert.Nil(t, err)
+
 	assert.Equal(t,
 		Response{DangerLevel: -1,
 			TravelAdvice: "Watch for signs of unstable snow such as recent avalanches, cracking in the snow, and audible collapsing. Avoid traveling on or under similar slopes.",
 			OffSeason:    true},
-		response)
+		response.Data)
 
 }
 
 func TestGetForecastAAAAPIError(t *testing.T) {
 	requester := mocks.NewRequester(t)
-	controller := APIv1Controller{Requester: requester}
-
-	file, err := os.Open("../aaa_api/testdata/offseason_sac.json")
-	assert.Nil(t, err)
-	defer file.Close()
+	controller := APIv2Controller{Requester: requester}
 
 	aaaResponse := aaa_api.Root{}
 	requester.On("GetForecastByCenter", "SAC").Return(aaaResponse, aaa_api.ErrUpstreamAPIError)
@@ -71,7 +67,10 @@ func TestGetForecastAAAAPIError(t *testing.T) {
 	r.ServeHTTP(w, c.Request)
 
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
-	response, err := io.ReadAll(w.Body)
+
+	responseDecoder := json.NewDecoder(w.Body)
+	response := EnvelopeError{}
+	err := responseDecoder.Decode(&response)
 	assert.Nil(t, err)
-	assert.Len(t, response, 0)
+	assert.Equal(t, EnvelopeError{ResponseStatusError, "error requesting forecast"}, response)
 }
