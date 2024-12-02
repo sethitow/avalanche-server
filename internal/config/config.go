@@ -28,5 +28,5 @@ func LoadConfig(path string) (*Config, error) {
 	var config Config
 
 	err = v.Unmarshal(&config)
-	return &config, nil
+	return &config, err
 }
