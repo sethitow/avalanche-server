@@ -1,4 +1,4 @@
-package apiv2
+package apiv3
 
 import (
 	"avalancheserver/internal/aaa_api"
@@ -46,11 +46,11 @@ type ForecastArea struct {
 	OffSeason    bool   `json:"off_season"`
 }
 
-type APIv2Controller struct {
+type APIv3Controller struct {
 	Requester aaa_api.Requester
 }
 
-func (controller *APIv2Controller) GetForecast(c *gin.Context) {
+func (controller *APIv3Controller) GetForecast(c *gin.Context) {
 	avalanche_center := c.Param("center")
 	response, err := controller.Requester.GetForecastByCenter(avalanche_center)
 	if err != nil {
@@ -109,6 +109,7 @@ func (controller *APIv2Controller) GetForecast(c *gin.Context) {
 			expiresAtInt = int(expiresAt.Unix())
 		}
 		forecastArea := ForecastArea{
+			Name:         feature.Properties.Name,
 			DangerLevel:  feature.Properties.DangerLevel,
 			TravelAdvice: feature.Properties.TravelAdvice,
 			UpdatedAt:    updatedAtInt,

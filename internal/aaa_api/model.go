@@ -7,6 +7,7 @@ type Root struct {
 
 type Feature struct {
 	Type       string     `json:"type"`
+	ID         int64      `json:"id"`
 	Properties Properties `json:"properties"`
 }
 
